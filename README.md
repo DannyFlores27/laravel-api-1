@@ -1,61 +1,164 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🚀 API CRUD de Clientes con Laravel y Docker
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Este proyecto implementa una **API RESTful** para la gestión de clientes
+(CRUD) utilizando **Laravel 12** y el entorno de desarrollo **Sail
+(Docker Compose)**.\
+Está configurado para un entorno **Windows/PowerShell**, priorizando la
+estabilidad y la portabilidad a través de contenedores.
 
-## About Laravel
+------------------------------------------------------------------------
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📋 Requisitos del Sistema
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Para ejecutar este proyecto necesitas:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+-   [Git](https://git-scm.com/)
+-   [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+    (con Docker Compose y soporte WSL2 o Hyper-V)
+-   Un cliente HTTP para pruebas (Postman o Insomnia)
 
-## Learning Laravel
+------------------------------------------------------------------------
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## ⚙️ Configuración e Inicialización
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### 1. Preparación del Proyecto
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Clona el repositorio e ingresa al directorio:
 
-## Laravel Sponsors
+``` bash
+git clone https://github.com/DannyFlores27/laravel-api-1.git
+cd laravel-api-1
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Configura el archivo de entorno:
 
-### Premium Partners
+``` bash
+cp .env.example .env
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+------------------------------------------------------------------------
 
-## Contributing
+### 2. Configuración de Puerto Estándar
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+En el archivo `.env`, define el puerto de la aplicación como **8000**:
 
-## Code of Conduct
+``` env
+# .env
+APP_PORT=8000
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+------------------------------------------------------------------------
 
-## Security Vulnerabilities
+### 3. Instalación de Dependencias y Arranque
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Instala las dependencias de Composer utilizando Docker:
 
-## License
+``` bash
+docker run --rm     -u "$(id -u):$(id -g)"     -v $(pwd):/var/www/html     -w /var/www/html     laravelsail/php84-composer:latest composer install --ignore-platform-reqs
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Levanta los contenedores (Laravel `laravel.test` y MySQL `mysql`):
+
+``` bash
+docker compose up -d
+```
+
+Genera la clave de la aplicación:
+
+``` bash
+docker compose exec laravel.test php artisan key:generate
+```
+
+------------------------------------------------------------------------
+
+### 4. Inicializar la Base de Datos y Tablas
+
+Ejecuta migraciones desde cero:
+
+``` bash
+docker compose exec laravel.test php artisan migrate:fresh
+```
+
+⚠️ Si obtienes un error de permisos en `storage/logs`, ejecuta:
+
+``` bash
+docker compose exec laravel.test chmod -R 777 storage bootstrap/cache
+```
+
+------------------------------------------------------------------------
+
+## 🌐 Uso de la API (Endpoints)
+
+La API base está accesible en:\
+👉 `http://localhost:8000`
+
+Todas las rutas tienen el prefijo **/api**.
+
+### Rutas CRUD de Clientes
+
+  ----------------------------------------------------------------------------------
+  Método   Endpoint              Descripción                      Respuesta Exitosa
+  -------- --------------------- -------------------------------- ------------------
+  POST     `/api/clients`        Crea un nuevo cliente            `201 Created`
+
+  GET      `/api/clients`        Obtiene la lista de todos los    `200 OK`
+                                 clientes                         
+
+  GET      `/api/clients/{id}`   Obtiene los detalles de un       `200 OK`
+                                 cliente                          
+
+  PATCH    `/api/clients/{id}`   Actualiza parcialmente un        `200 OK`
+                                 cliente                          
+
+  DELETE   `/api/clients/{id}`   Elimina un cliente               `204 No Content`
+  ----------------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+## 🧪 Ejemplos de Pruebas con JSON
+
+Usar **Postman o Insomnia** con `Content-Type: application/json`.
+
+### 1. Crear Cliente (POST)
+
+**URL:** `http://localhost:8000/api/clients`
+
+``` json
+{
+  "name": "Martín Desarrollador",
+  "email": "martin.dev@api.com",
+  "phone": "999-000-1111"
+}
+```
+
+------------------------------------------------------------------------
+
+### 2. Actualizar Cliente (PATCH)
+
+**URL:** `http://localhost:8000/api/clients/1`
+
+``` json
+{
+  "phone": "555-555-5555"
+}
+```
+
+------------------------------------------------------------------------
+
+### 3. Eliminar Cliente (DELETE)
+
+**URL:** `http://localhost:8000/api/clients/1`
+
+(No requiere cuerpo. Respuesta vacía con código **204**).
+
+------------------------------------------------------------------------
+
+## 🛑 Detener el Entorno Docker
+
+Para detener y liberar recursos:
+
+``` bash
+docker compose stop
+```
+
+------------------------------------------------------------------------
